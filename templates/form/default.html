@@ -1,0 +1,44 @@
+{% for error in form.non_field_errors %}
+<div class="alert alert-error">
+  {{ error }}
+</div>
+{% endfor %}
+
+{% for hidden in form.hidden_fields %}
+    {{ hidden }}
+{% endfor %}
+
+{% for field in form.visible_fields %}
+<div class="control-group {% if field.errors %}error{% endif %}"> 
+    {% block label %}
+    <label class="control-label" for="{{ field.name }}">
+        {% if field.field.required %}<b>*</b> {% endif %}{{ field.label }}
+    </label>
+    {% endblock %}
+    <div class="controls">
+       {% block field %}
+            {{ field }}
+       {% endblock %}
+       {% block errors %}
+    	   {% if field.errors %}
+    	   <span class="help-inline">
+        	{% for error in field.errors %}
+        		{{ error }}
+        	{% endfor %}
+    	   </span>
+    	   {% endif %}
+       {% endblock %}
+       {% block help %}
+    	   {% if field.help_text %}
+    	   <span class="help-block pull-right">
+    	   		<i class='icon-info-sign icon-white'></i> {{ field.help_text }}
+    	   </span>
+    	   {% endif %}
+       {% endblock %}
+    </div>
+</div>
+{% endfor %}
+
+<div>
+<i><b>*</b> is required</i>
+</div>

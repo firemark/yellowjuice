@@ -1,0 +1,4 @@
+{% load i18n %}
+{% blocktrans %}
+Prelection "{{title}}" change status from {{old_status}} to {{new_status}}
+{% endblocktrans %}

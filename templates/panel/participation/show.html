@@ -1,0 +1,45 @@
+{% extends 'panel/base.html' %}
+{% load i18n %}
+
+{% block content %}
+
+<h3>Participations</h3>
+
+{% if old_participations %}
+<div class="alert alert-block">
+    {% trans "I see participants from older conference:" %}
+    {{ old_participantions|join:", " }}
+    {% trans "Do you want restore?" %}
+    <a href='{% url "participation:restore" is_true="yes" %}' class='btn btn-primary'>{% trans "yes" %}</a>
+    <a href='{% url "participation:restore" is_true="no" %}' class='btn'>{% trans "no" %}</a>
+</div>
+{% endif %}
+<table class='table'>
+    <thead>
+        <tr>
+            <th>{% trans "First name" %}</th>
+            <th>{% trans "Last name" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "Options" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for participation in participations %}
+        {% with participation.participant as participant %}
+        <tr>
+            <td>
+                <a href="{% url 'participation:edit' pk=participation.pk %}">{{ participant.first_name }}</a>
+            </td>
+            <td>{{ participant.last_name }}</td>
+            <td>{{ participation.get_status_display }}</td>
+            <td>
+                <a class="btn btn-small btn-info" href="{% url 'participation:edit' pk=participation.pk %}">{% trans "Change" %}</a>
+                <a class="btn btn-small btn-warning" href="{% url 'participation:delete' pk=participation.pk %}">{% trans "Delete" %}</a>
+            </td>
+        </tr>
+        {% endwith %}
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'participation:new' %}" class="btn btn-primary">{% trans "Propose a new participation" %}</a>
+{% endblock %}

@@ -1,0 +1,15 @@
+https://github.com/django/django/archive/072e25eee70c0e629fcbb37f0485a6c6694b6856.zip
+#Django==1.5.1
+# This version should work with Py3
+git+https://github.com/jezdez/django_compressor.git@0ae95827f4ce5a6eff54ecc9429b323539308dc4#egg=django_compressor
+# Finite State Machine helpers and field
+git+https://github.com/kmmbvnr/django-fsm.git@2601af16967202acc633eff293b82c60fd8e736c#egg=django-fsm
+
+djangorestframework==2.3.5
+Markdown==2.3.1
+django-filter==0.6
+bootstrap-admin==0.3.0
+django-markdown==0.2.1
+
+# Needed for create_test_data
+factory-boy==2.0.2

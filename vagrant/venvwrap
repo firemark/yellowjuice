@@ -1,0 +1,82 @@
+#!/bin/bash
+# Run command with virtualenvwrapper sourced or inside a virtualenv
+set -e
+
+show_help() {
+    echo "Usage: $0 [-e VENV_NAME] COMMAND [ARG1 [ARG2...]]"
+    echo "  -e VENV_NAME  run command in given virtualenv"
+    echo "                (default: only load virtuealenvwrapper,"
+    echo "                but don't activate any environments)"
+}
+
+find_virtualenvwrapper() {
+   # From: http://stackoverflow.com/questions/13111881/scripting-virtualenvwrapper-mkvirtualenv
+   #
+   # no consistent way to find 'virtualenvwrapper.sh', so try various methods
+   # is it directly available in the path?
+   virtualenvwrapper_path=$(which virtualenvwrapper.sh)
+   if [ $? -eq 0 ]; then
+      echo $virtualenvwrapper_path
+      return
+   fi
+   # nope; how about something that looks like it in our path?
+   # http://stackoverflow.com/questions/948008/linux-command-to-list-all-available-commands-and-aliases
+   virtualenvwrapper_cmd=$(compgen -ac | grep -i 'virtualenvwrapper\.sh' | sort | uniq | head -1)
+   if [ -n "$virtualenvwrapper_cmd" ]; then
+      virtualenvwrapper_path=$(which $virtualenvwrapper_cmd)
+      if [ $? -eq 0 ]; then
+         echo $virtualenvwrapper_path
+         return
+      fi
+   fi
+   # still not; Debubuntu puts it in /etc/bash_completion.d
+   virtualenvwrapper_path='/etc/bash_completion.d/virtualenvwrapper'
+   if [ -e "$virtualenvwrapper_path" ]; then
+      echo $virtualenvwrapper_path
+      return
+   fi
+   # any other methods to find virtualenvwrapper can be added here
+   echo "unable to find virtualenvwrapper.sh or anything that looks like it" >&2
+   exit 1
+}
+
+MODE=wrapper_command
+
+while [ -n "$1" ]; do
+    case "$1" in
+        -h)
+            show_help
+            exit 0
+            ;;
+        -e)
+            shift
+            ENV_NAME="$1"
+            MODE=run_in_env
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            break
+            ;;
+    esac
+    shift
+done
+
+set +e
+. $(find_virtualenvwrapper)
+
+case $MODE in
+    wrapper_command)
+        $@
+        ;;
+    run_in_env)
+        workon $ENV_NAME
+        $@
+        ;;
+    *)
+        echo INTERNAL ERROR
+        exit 1
+        ;;
+esac

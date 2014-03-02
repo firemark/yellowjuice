@@ -1,0 +1,21 @@
+<script type="text/html" id="panelLayoutTemplate">
+    <div id="panelMenu" />
+    <div id="panelContent" />
+    <div class="clear" />
+</script>
+
+<script type="text/html" id="participant-inline">
+    <li>
+        <%= full_name %>
+        <form class="model-form form-in-list">
+            <div class="control-group">
+                <label class="control-label" for="participant_<%= id %>_first_name"
+                    >First name</label>
+                <div class="controls">
+                    <input type="text" name="first_name" value="<%= first_name %>" />
+                </div>
+            </div>
+            <button type="submit">Save</button>
+        </form>
+    </li>
+</script>

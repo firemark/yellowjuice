@@ -1,0 +1,39 @@
+{% extends 'panel/base.html' %}
+{% load i18n %}
+
+{% block content %}
+
+<h3>Prelections</h3>
+
+<table class='table'>
+    <thead>
+        <tr>
+            <th>{% trans "Title" %}</th>
+            <th>{% trans "Authors" %}</th>
+            <th>{% trans "Length" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "Options" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for prelection in prelections %}
+        <tr>
+            <td>
+                <a href="{% url 'prelection:edit' pk=prelection.pk %}">{{ prelection.title }}</a>
+            </td>
+            <td>
+                <b>{{ prelection.main_prelector.full_name }}</b>
+                {% for p in prelection.other_prelections %} {{p.full_name}}, {% endfor %}
+            </td>
+            <td>{{ prelection.length }}</td>
+            <td>{{ prelection.get_status_display }}</td>
+            <td>
+                <a class="btn btn-small btn-info" href="{% url 'prelection:edit' pk=prelection.pk %}">{% trans "Change" %}</a>
+                <a class="btn btn-small btn-warning" href="{% url 'prelection:delete' pk=prelection.pk %}">{% trans "Delete" %}</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'prelection:new' %}" class="btn btn-primary">{% trans "Propose a new prelection" %}</a>
+{% endblock %}

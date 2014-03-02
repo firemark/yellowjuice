@@ -1,0 +1,79 @@
+{% extends "admin/change_list.html" %}
+
+{% block title %}Setup Menu{% endblock %}
+{% block content_title %}<h1>Setup Menu</h1>{% endblock %}
+
+{% block content %}
+<style>
+	.well div{
+		width: 50%;
+		padding: 0px 0px 25px 0px;
+		margin: 0px;
+	}
+	.well ul{
+		width: 450px;
+		background-color: #fff;
+		margin: 0 5px;
+		min-height: 300px;
+		border: #ccc 1px solid !important;
+		border-radius: 5px;
+	}
+	.well h4, .nav a{
+		text-align: center;
+	}
+	.ui-sortable-placeholder{
+		border: 2px dotted black; visibility: visible !important;
+		border-radius: 5px;
+	}
+</style>
+<div id="content-main">
+	<div class="well pull-left">
+		<p>Please, Drap &amp; Drop</p>
+		<div class="pull-left">
+			<h4>Visible Menu</h4>
+			<ul class="nav nav-tabs nav-stacked menu">
+			{% for menu in cl.result_list %}
+				<li data-pk="{{ menu.article.pk }}"><a>{{ menu.article }}</a></li>
+			{% endfor %}
+			</ul>
+		</div>
+		<div class="pull-left">
+			<h4>Visible Articles</h4>
+			<ul class="nav nav-tabs nav-stacked">
+			{% for article in articles %}
+				<li data-pk="{{ article.pk }}" ><a>{{ article }}</a></li>
+			{% endfor %}
+			</ul>
+		</div>
+		<button class='btn btn-primary pull-right save' data-loading-text="loading stuff...">Save</button>
+	</div>
+</div>
+{% endblock %}
+
+{% block js_footer %}
+<script type="text/javascript">
+$(function() {
+    $(".nav-stacked").sortable({
+      connectWith: ".nav-stacked"
+    }).disableSelection();
+
+    save_btn = $('.save');
+    //save_btn.button('loading');
+
+    save_btn.click(function(){
+    	var table = [];
+
+    	$(".menu li").each(function(position){
+    		table.push($(this).data("pk"));
+    	});
+
+		$.post("{% url 'admin:menu-save-all' %}",{"menu[]": table},
+				function(data) {
+					save_btn.text('Done!');
+					setTimeout(function(){ save_btn.text('Save'); }, 2000);
+				}
+		);
+    })
+  });
+</script>
+{% endblock %}

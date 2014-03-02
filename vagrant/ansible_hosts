@@ -1,0 +1,1 @@
+vagrant ansible_ssh_port=8354 ansible_ssh_host=localhost

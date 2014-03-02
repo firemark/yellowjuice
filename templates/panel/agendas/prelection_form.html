@@ -1,0 +1,23 @@
+{% extends 'panel/base.html' %}
+{% load form_render %}
+{% load i18n %}
+
+{% block content %}
+    <form action="." method="POST">
+        {% csrf_token %}
+        {{ form|form_render }}
+        {% if not form.disabled %}
+        <button type="submit">{% trans "Save" %}</button>
+        {% endif %}
+    </form>
+    {% for comment in object.comments %}
+    {{ comment.author }}: {{ comment.content }} {# TODO: styling #}
+    {% endfor %}
+    {% if comment_form %}
+    <form action="." method="POST">
+        {% csrf_token %}
+        {{ comment_form }}
+        <button type="submit" name="comment">{% trans "Leave a comment" %}</button>
+    </form>
+    {% endif %}
+{% endblock %}

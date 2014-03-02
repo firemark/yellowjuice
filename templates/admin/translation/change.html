@@ -1,0 +1,53 @@
+{% extends "admin/change_form.html" %}
+{% load translation %}
+{% load i18n admin_static admin_modify %}
+{% load admin_urls %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a> <span class="divider">/</span>
+        </li>
+        <li>
+            <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ app_label|capfirst|escape }}</a> <span class="divider">/</span>
+        </li>
+        <li>
+            {% if has_change_permission %}<a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}<span class="divider">/</span>
+        </li>
+        {% if request.article_pk %}
+        <li>
+        	<a href="{% url 'admin:articles_article_change' request.article_pk %}">Article</a> <span class="divider">/</span>
+        </li>
+        {% endif %}
+        <li class="active">{% if add %}{% trans 'Add' %} {{ opts.verbose_name }}{% else %}{{ original|truncatewords:"18" }}{% endif %}</li>
+    </ul>
+{% endblock %}
+
+{% block object-tools %}
+	{{ block.super }}
+	{% if perms.articles and request.article_pk and not original.pk %}
+	<ul class="object-tools">
+		<li>
+	        <a href="{% url 'admin:articles_article_change' request.article_pk %}" class="btn btn-info">
+	            Return to article
+	        </a>
+		</li>
+	</ul>
+	{% endif %}
+{% endblock %}
+
+{% block object-tools-items %}
+	{{ block.super }}
+	<li>
+        <a href="{% url 'admin:articles_article_change' original.article.pk %}" class="btn btn-info">
+            Return to article
+        </a>
+	</li>
+    {% if perms.articles %}
+	   <li> {{original|status:'button'}} </li>
+    {% else %}
+        <li> {{original|status_without_perms:'button'}} </li>
+    {% endif %}
+        
+	
+{% endblock %}

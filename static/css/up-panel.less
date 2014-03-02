@@ -1,0 +1,24 @@
+.up-panel {
+	#gradient > .vertical(@grayLighter, @white);
+	border-bottom: @grayLighter 1px solid;
+	width: 100%;
+	input[type="text"], input[type="password"]{
+		font-size: @fontSizeMini;
+		height: 10px;
+	}
+
+	.pull-right{
+		> span{
+			.pull-right;
+			height: 30px;
+			width: 100%;
+			> *{.pull-right;}
+		}
+	}
+
+	.nav-langs a{
+		.btn;
+		.btn-warning;
+		.btn-mini;
+	}
+}

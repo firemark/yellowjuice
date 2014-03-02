@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+{% load compress %}
+{% load i18n %}
+
+<html{% block html_attrs %}{% endblock %}>
+    <head>
+        {% block head %}
+        {% compress css %}
+            <link charset="utf-8" type="text/less" rel="stylesheet"
+                href="{{ STATIC_URL }}css/styles.less" />
+        {% endcompress %}
+
+        {% if debug %}
+            <script type="text/javascript">
+                less = { env: 'development', };
+            </script>
+            <script type="text/javascript" src="{{ STATIC_URL }}javascript/vendor/less.min.js" ></script>
+        {% endif %}
+        {% compress js %}
+          <script src="{{ STATIC_URL }}javascript/vendor/jquery-1.10.2.js"></script>
+        {% endcompress %}
+        {% block addons %}
+        {% endblock %}
+        {% endblock head %}
+    </head>
+    <body>
+{% block navbar %}
+<div class="up-panel">
+  <div class="container">
+    <div class='pull-left'>
+      <h2 class="muted">Yellow Juice</h2>
+
+      <ul class="nav nav-pills">
+        {% for node in menu %}
+          <li class='active'><a href="{% url 'article-show' pk=node.pk slug=node.slug %} ">{{node.title}}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class='pull-right'>
+      <span class='up'>
+          {% if not user.is_authenticated %}
+          <form class="navbar-form" action="{% url 'django.contrib.auth.views.login' %}" method='POST'>
+            {% csrf_token %}
+            <input class="span2" type="text" name='username' placeholder="{% trans 'Email' %}">
+            <input class="span2" type="password" name='password' placeholder="{% trans 'Password' %}">
+            <input name='next' type="hidden" value='{{ request.path }}' />
+            <input type="submit" style='display: none' />
+            |
+            <a href="{% url 'signup' %}">{% trans 'Sign up' %}</a>
+
+          </form>
+          {% else %}
+          <ul class='breadcrumb'>
+            <li class="active">{% trans 'Logged as' %} <span class='text-success'>{{user.email}}</span> <span class="divider">|</span></li>
+            <li><a href="{% url 'panel' %}">panel</a> <span class="divider">|</span></li>
+            {% if user.is_staff %}
+              <li><a href="{% url 'admin:index' %}">admin panel</a> <span class="divider">|</span></li>
+            {% endif %}
+            <li><a href="{% url 'django.contrib.auth.views.logout' %}">{% trans 'Logout' %}</a></li>
+          </ul>
+          {% endif %}
+      </span>
+      <span class='down'>
+
+        <ul class="nav nav-pills nav-langs">
+          {% for lang in langs %}
+            <li><a href="{% url 'change-language' lang.code %}">{{ lang.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </span>
+    </div>
+  </div>
+</div>
+
+    {% endblock navbar %}
+
+    <div class="container" id="appContainer">
+
+
+      {% for message in messages %}
+        <div class="alert alert-{{message.tags}}">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{message}}
+        </div>
+      {% endfor %}
+
+      {% block alert %}
+      {% endblock %}
+
+      {% block hero %}
+      {% endblock %}
+
+
+      {% block body %}
+      <div class="content">
+          {% block content %}{% endblock %}
+      </div>
+      {% endblock %}
+
+      <hr>
+
+      <footer>
+        <p>&copy; Yellowjuice Company 2013</p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    {% block javascript %}
+
+    {% endblock %}
+        
+    </body>
+</html>

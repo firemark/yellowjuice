@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block body %}
+<div class="navbar panel-menu">
+  <div class="navbar-inner">
+    <a class="brand" href="#">Panel</a>
+    <ul class="nav">
+	    <li><a href="{% url 'participation:show' %}">{% trans "Participants" %}</a></li>
+	    <li><a href="{% url 'prelection:show' %}">{% trans "Prelections" %}</a></li>
+        <li><a href="{% url 'item:show' %}">{% trans "Items" %}</a></li>
+    </ul>
+  </div>
+</div>
+<div class="content panel-content">
+    {% block content %}{% endblock %}
+</div>
+{% endblock body %}

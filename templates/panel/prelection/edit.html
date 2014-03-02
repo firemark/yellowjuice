@@ -1,0 +1,61 @@
+{% extends 'panel/base.html' %}
+{% load form_render %}
+{% load i18n %}
+
+{% block addons %}
+<script src="{{ STATIC_URL }}/javascript/vendor/showdown.js"></script>
+{% endblock %}
+{% block content %}
+    <form class="full-width" action="." method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|form_render }}
+        <div id='outlook'>
+            <div style='display: none;' id='html-text'></div>
+            <span>{% trans "Markdown is available" %}</span>
+            <button class='btn' id='to-HTML' type="button">{% trans "Preview" %}</button>
+            <button class='btn' id='to-markdown' type="button">{% trans "Edit again" %}</button>
+        </div>
+        
+        {% with form.files as formset %}
+            <h3>Files</h3>
+            {{ formset.management_form }}
+
+            {% for form in formset %}
+                {{form.errors}}
+                {{ form }}<br />
+            {% endfor %}
+            
+        {% endwith  %}
+        <br />
+        <button class='btn btn-primary' type="submit">{% trans "Save" %}</button>
+    </form>
+    <script>
+    $(function(){
+        var converter = new Showdown.converter(),
+            desc = $("#id_description"),
+            div_html = $("#html-text"),
+            to_html = $("#to-HTML"),
+            to_markdown = $("#to-markdown"),
+            div_outlook = $("#outlook");
+
+        //init
+        to_markdown.hide();
+        desc.after(div_outlook);
+
+        to_html.click(function(){
+            to_html.hide();
+            to_markdown.show();
+            var markdown = converter.makeHtml(desc.val());
+            div_html.html(markdown);
+            div_html.show();
+            desc.hide();
+        });
+        to_markdown.click(function(){
+            div_html.hide();
+            desc.show();
+            to_markdown.hide();
+            to_html.show();     
+        });
+    });
+    </script>
+{% endblock %}

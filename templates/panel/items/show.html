@@ -1,0 +1,120 @@
+{% extends 'panel/base.html' %}
+{% load i18n %}
+{% load split_by %}
+
+{% block content %}
+
+<h3>Items</h3>
+
+<form method="POST" action="{% url 'item:update' %}">
+{% csrf_token %}
+    {% for part in participantions|split_by:3 %}
+    <table class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th>Option</th>
+                {% for participantion in part %}
+                    <td>{{participantion.participant.full_name}}</td>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in groups %}
+            {% with group.r_translates.0 as group_translate %}
+            {% if group.show_description %}
+            <tr>
+                <th rowspan="2" width="20%">
+                    {% if group.required %}<b>*</b>{% endif %}
+                    {{ group_translate.name }}
+                </th>
+                <td colspan="{{ participantions|length|add:1 }}">
+                    {{ group_translate.description }}
+                </td>
+            </tr>
+            <tr>
+            {% else %}
+            <tr>
+                <th width="20%">
+                    {% if group.required %}<b>*</b>{% endif %}
+                    {{ group_translate.name }}
+                </th>
+            {% endif %}
+                {% for participantion in part %}
+                <td>
+                    <select name="{{participantion.pk}}/{{group.pk}}">
+                        <option value='_'>-------</option>
+                        {% for option in group.r_options %}
+                            <option value="{{option.pk}}" 
+                            {% if option.pk in participantion.pk_options %} selected {% endif %}
+                            >{{option.r_translates.0.name}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+    <input class="btn btn-primary" type="submit" value="{% trans 'Save' %}" />
+    <div class="total-div well well-small pull-right">
+        <strong>Total:</strong> <span class='total_text'>-</span>
+        <select name="currency" class="span1">
+        {% for currency in currencies %}
+            <option value='{{currency.pk}}'>{{currency.code}}</option>
+        {% endfor %}
+        </select>
+    </div>
+    {% endfor %}
+</form>
+
+<script>
+
+var select_item_node = "table select";
+var select_currency_node = "select.span1";
+
+var currencies = {
+    {% for currency in currencies %}
+        "{{currency.pk}}": {
+         {% for obj in currency.r_prices %}
+            "{{obj.option_id}}": {{obj.price}},
+         {% endfor %}   
+        },
+    {% endfor %}
+};
+
+{% if user.currency %}
+var currency = {{ user.currency_id }};
+{% else %}
+var currency = undefined;
+
+//get first element
+for(currency in currencies) break;
+{% endif %}
+
+function compute_sum(){
+    var sum = 0.0;
+    $(select_item_node).each(function(i, node){
+        var pk = node.value;
+        if (pk != "_"){
+            sum += currencies[currency][pk];
+        }
+    });
+    $(".total_text").text(sum.toFixed(2));    
+}
+
+function change_currency(ev){
+    currency = ev.target.value;
+    $(select_currency_node).val(currency);
+    compute_sum();
+}
+
+$(function(){
+    $(select_currency_node).val(currency);
+    compute_sum();
+    $(select_item_node).on('change', compute_sum);
+    $(select_currency_node).on('change', change_currency);
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'panel/base.html' %}
+{% load i18n %}
+
+{% block content %}
+{% trans 'Do you want remove prelection' %} {{obj.title}}?
+<form method="POST" action="{% url 'prelection:delete' pk=pk %}">
+{% csrf_token %}
+    <input class='btn btn-info' type='submit' value='Yes' />
+    <a class='btn' href="{% url 'prelection:show' %}">No</a>
+</form>
+{% endblock %}

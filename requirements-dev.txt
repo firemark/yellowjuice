@@ -1,0 +1,9 @@
+# Tests {
+pytest==2.3.5
+pytest-cov==1.6
+pytest-django==2.3.0
+# version with py3k support
+git+https://github.com/encukou/pytest-flakes.git@79a25389d86ca0e53e4647f9c2c6228d7a7ecb99#egg=pytest-flakes
+pytest-pep8==1.0.4
+pytest-xdist==1.8
+# }

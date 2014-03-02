@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e
+
+VENV=yellowjuice
+
+VENV_WRAPPER=`which virtualenvwrapper.sh || \
+    echo /etc/bash_completion.d/virtualenvwrapper`
+
+. $VENV_WRAPPER
+
+set +e  # virtualenvwrapper has broken return codes
+mkvirtualenv -p python3 $VENV
+workon $VENV
+set -e
+
+# Add npm settings to virtualenv
+if ! grep 'npm_config_prefix' $VIRTUAL_ENV/bin/activate; then
+    echo 'export npm_config_prefix=$VIRTUAL_ENV' >> $VIRTUAL_ENV/bin/activate
+    echo 'set -x npm_config_prefix $VIRTUAL_ENV' >> $VIRTUAL_ENV/bin/activate.fish
+
+    # Re-enter the virtualenv to load new settings
+    set +e
+    deactivate
+    workon $VENV
+    set -e
+fi
+
+# Hack for Debian: use `nodejs` as `node`
+if ! which node && which nodejs > /dev/null; then
+    ln -s `which nodejs` $VIRTUAL_ENV/bin/node
+fi
+
+
+npm install -g `cat node-requirements.txt`
+pip install -r requirements.txt -r requirements-dev.txt
+
+echo 'OMG it worked! Now type: workon' $VENV

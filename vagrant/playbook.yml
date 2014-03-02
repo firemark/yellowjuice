@@ -1,0 +1,51 @@
+---
+# Prepare system
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: apt-get upgrade
+      apt: update_cache=yes upgrade=yes
+    - name: install some basic packages
+      apt: pkg=$item state=latest
+      with_items:
+        - language-pack-pl
+        - git
+    - name: ensure python3.3 is available
+      apt: pkg=$item state=latest
+      with_items:
+        - python3.3
+        - python3-pip
+        - virtualenvwrapper
+    - name: ensure lessc is available
+      apt: pkg=node-less state=latest
+    - name: ensure Sphinx documentation generator is available
+      apt: pkg=python3-sphinx state=latest
+
+# Setup user's environment
+- hosts: all
+  gather_facts: no
+  sudo: True
+  sudo_user: vagrant
+  vars:
+    project: yellowjuice
+    home: /home/vagrant
+  tasks:
+    - name: create $HOME/bin
+      file: path=${home}/bin state=directory
+    - name: install virtualenvwrapper wrapper
+      copy: src=venvwrap dest=${home}/bin/venvwrap mode=0755
+
+    - name: make vagrant ssh go straight to /vagrant
+      lineinfile: dest=${home}/.profile regexp="^cd /" line="cd /vagrant"
+    - name: make vagrant ssh start with workon
+      lineinfile: dest=${home}/.profile regexp="^workon " line="workon ${project}"
+
+    - name: create virtualenv
+      shell: |
+        ${home}/bin/venvwrap mkvirtualenv -p python3.3 --system-site-packages ${project}
+        creates=${home}/.virtualenvs/${project}/
+    - name: populate virtualenv
+      # don't use mirrors - it was making OOM killer stop pip
+      pip: requirements=/vagrant/requirements.txt virtualenv=${home}/.virtualenvs/${project}/ use_mirrors=no
+      environment:
+        LC_ALL: en_US.UTF-8  # some packages installation need UTF locale

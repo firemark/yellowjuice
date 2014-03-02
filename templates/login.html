@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load form_render %}
+
+{% block content %}
+  <form class="form-signin" action="{% url 'django.contrib.auth.views.login' %}" method="POST">
+    <h2 class="form-signin-heading">{% trans 'Please sign in' %}</h2>
+  	{% csrf_token %}
+    {{ form|form_render:"placeholder" }}
+    <button class="btn btn-large btn-primary" type="submit">Sign in</button>
+  </form>
+{% endblock content %}

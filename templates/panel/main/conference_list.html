@@ -1,0 +1,10 @@
+{% extends 'panel/base.html' %}
+
+{% block content %}
+<ul>
+    {% for conference in conferences_list %}
+    <li><a href="{% url 'panel/conference-update' conference_pk=conference.pk %}"
+         >{{ conference.pk }} TODO: Should be a name</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

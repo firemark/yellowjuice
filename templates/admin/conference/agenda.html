@@ -1,0 +1,294 @@
+{% extends "admin/change_form.html" %}
+
+{% block title %}Set Agenda{% endblock %}
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<style>
+	.well div{
+		width: 100%;
+		margin: 0px;
+	}
+	.well ul{
+		width: 250px;
+		background-color: #fff;
+		margin: 0 5px;
+		height: 100px;
+		border: #ccc 1px solid !important;
+		border-radius: 5px;
+    overflow: auto;
+	}
+	.well h4, .nav a{
+		text-align: center;
+	}
+	.ui-sortable-placeholder{
+		border: 2px dotted black; visibility: visible !important;
+		border-radius: 5px;
+	}
+  .agenda{
+    width: 500px;
+    overflow: visible;
+  }
+	table th b{
+		color: gray;
+	}
+	table td a{
+		height: 100%;
+	}
+  thead{
+    display: block;
+    width: 100%;
+  }
+  tbody{
+    display: block;
+    height: 300px;
+    overflow-y: auto;  
+  }
+	table td, table th, .nav-stacked a{
+		font-size: 8pt;
+		line-height: 10px !important;
+		padding: 4px !important;
+		vertical-align: middle !important;
+		text-align: center !important;
+	}
+	table th:first-child{
+		width: 100px;
+	}
+	table button{
+		padding: 0 5px !important;
+	}
+	table th{
+		text-align: center !important;
+	}
+  table td, table th{
+    width: 150px;
+  }
+</style>
+<div id="content-main">
+	<div class="well pull-left">
+        <div>
+            <p>Please, Drag &amp; Drop</p>
+            <ul class="nav nav-tabs nav-stacked pull-left">
+            {% for p in conference.not_added_prelections %}
+                <li id='event_{{ p.pk }}' draggable="true">
+                    <a data-pk="{{ p.pk }}" data-len="{{ p.length }}">
+                        <b>{{p.main_prelector.full_name}}</b> {{ p.title }} <br /> &#8987; {{ p.length }} min
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+            <button class='btn btn-primary pull-left save' data-loading-text="loading stuff...">Save</button>
+        </div>
+		<div class="pull-left agenda">
+			<table class='table table-bordered table-condensed'>
+				<thead>
+					<tr>
+						<th>Time</th>
+            <th>Global</th>
+            {% for room in conference.rooms.all %}
+						<th>{{room.key}}</th>
+            {% endfor %}
+					</tr>
+				</thead>
+				<tbody>
+					{% for date in conference.datetime_range %}
+					<tr data-time='{{date|date:"Y-m-d H:i"}}'>
+						<th>
+							{% ifchanged %}
+								<b>{{date|date:"l"}}</b>
+							{% endifchanged %}
+							{{date|date:"H:i"}}
+						</th>
+            <td data-room='X'></td>
+            {% for room in conference.rooms.all %}
+            <td data-room='{{room.pk}}'></td>
+            {% endfor %}
+					</tr>
+					{% endfor %}
+				</tbody>		
+			</table>
+		</div>
+
+	</div>
+</div>
+{% endblock %}
+
+{% block js_footer %}
+<script type="text/javascript">
+
+// {{…}} oraz {%…%} to znaki szablonu, które wyrenderują daną wartość
+// np. {{ TIMEDELTA }} zostanie wyrenderowany na liczbę np. 15
+// $(arg) to jquery - gdzie zmienna arg to zapytanie do dokumentu o elementy
+// oraz zwraca listę elementów które pasują do zapytania
+// zapytania wyglądają tak samo jak elementy w CSS
+// jezeli arg będzie elementem HTML np. "<b>test</b>" to zostanie stworzony
+// a następnie zwrócony jako obiekt
+
+
+// Tablica jest podzielona na wiersze (tr) i komórki (td) - komórki zawierają argument data-room
+// a wiersze zawierają argument data-time 
+// każda komórka posiada rodzica wiersz.
+
+function get_cols(len){ return Math.ceil(parseInt(len) / {{ TIMEDELTA }}) }
+
+function start_add_prelection(date, room, pk, len, title){
+    console.log(date, room);
+    //zapytanie
+    var str_td = 'tr[data-time="'+ date +'"] td[data-room="'+ room +'"]';
+    //znalezienie komórki, do której mamy dodać prelekcję
+    var td = $(str_td);
+    return add_prelection(td, pk, len, title);
+}
+
+function add_prelection(td, pk, len, title){ 
+
+		var cols = get_cols(len); // obliczanie ile potrzebuje komórek dana prelekcja
+    var str_td = "td[data-room='" + td.data("room") + "']";
+
+    //sprawdzenie czy nie ma blokady (czy prelekcje nie najeżdżają na siebie)
+  	var tr = td.parent();
+  	for(var i = 0; i < cols; i++){
+  		if(!tr.length)
+  			return false;
+  		if(tr.find(str_td + " a").length > 0)
+  			return false;
+  		tr = tr.next();
+  	}
+
+  	//dodanie prelekcji do komórek
+  	var a = $("<a>");
+  	a.data("pk", pk);
+  	a.data("len", len);
+  	a.html(title);
+
+  	//dodanie przycisku usuwającego prelekcję
+  	var button = $("<button class='btn btn-small btn-warning'>&times;</button>");
+  	button.click(delete_prelection);
+
+  	td.append(a);
+  	td.append(button);
+  	td.attr("rowspan", cols);
+  	td.css("background-color", "LightBlue");
+
+  	//ustawienie pokrywających komórek jako puste - inaczej tablica się rozjedzie
+  	var tr = td.parent();
+  	for(var i = 1; i < cols; i++){
+  		tr = tr.next();
+  		if(!tr.length)
+  			break;
+  		tr.find(str_td).css("display", "none");
+  	}
+
+  	return true;
+}
+
+function delete_prelection(){
+	var td = $(this).parent();
+	var a = td.find("a");
+  var str_td = "td[data-room='" + td.data("room") + "']";
+	
+
+  //stworzenie elementu listy
+  //prelekcja musi zostac skasowana w komórce i wrócić do listy
+
+  var li = $("<li id='event_" + a.data("pk") + "'>");
+  li.on('dragstart', dragstart);
+  li.attr('draggable', "true");
+	li.append(a);
+
+	$(".nav-stacked").append(li);
+
+	td.attr("rowspan", 1);
+	td.css("background-color", "transparent");
+
+	//wyswietlenie ukrytych komórek
+  	var tr = td.parent();
+  	var cols = get_cols(a.data("len"));
+
+  	for(var i = 1; i < cols; i++){
+  		tr = tr.next();
+  		if(!tr.length)
+  			break;
+  		tr.find(str_td).css("display", "table-cell");
+  	}
+
+  	td.html("");
+}
+
+function dragstart(e){
+  //w HTML5 drag&drop się komunikuje przy pomocy dataTransfer
+  //przesuwany element wysyła dane
+  //a element na który się wpuszcza odbiera
+  //w tym miejscu prelekcja którą przesuwam wysyła własny id
+  e.originalEvent.dataTransfer.setData("id", e.target.id);
+}
+
+$(function(){
+
+    //wszystkie prelekcje mają mieć zdarzenie dragstart
+    $(".nav-stacked li").on('dragstart', dragstart);
+
+    //znalezienie wszystkich komórek
+    var td = $("td");
+
+
+    //zdarzenia dla komórek
+    td.on('dragover', function(e){
+      e.preventDefault();
+    })
+
+
+    //zdarzenie które ukrywa
+    td.on('drop', function(e){
+      e.preventDefault();
+      var id = e.originalEvent.dataTransfer.getData("id");
+      var li = $("#" + id);
+      var a = li.find("a");
+      if(add_prelection($(e.target), a.data("pk"), a.data("len"), a.html()))
+        li.remove();
+    });
+
+    save_btn = $('.save');
+
+
+    //funkcja która pobiera wszystkie prelekcje w tablicy
+    //i tworzy tablicę (w JS) która zostanie wysłana do serwisu
+    save_btn.click(function(){
+    	var prelections = [];
+    	var not_added = [];
+      save_btn.text('Saving...');
+
+    	$("td").each(function(){
+    		var td = $(this);
+    		var a = td.find("a");
+    		if (a.length)
+    			prelections.push(a.data("pk") + "/" + td.parent().data("time") + "/" + td.data("room"));
+    	});
+
+    	$(".nav-stacked li").each(function(){
+    		not_added.push($(this).find("a").data("pk"));
+    	})
+
+      //wyslanie zapytania HTTP
+		$.post("{% url 'admin:agenda-save-all' conference.pk %}",
+				{"agenda[]": prelections, "not_added[]": not_added},
+				function(data) {
+					save_btn.text('Done!');
+					setTimeout(function(){ save_btn.text('Save'); }, 2000);
+				}
+		);
+    })
+
+    //generowanie na początku listy prelekcji które są w bazie
+    //po załadowaniu strony zostaną dynamicznie dodane
+    {% for p in conference.agenda %}
+    start_add_prelection(
+        '{{p.time|date:"Y-m-d H:i"}}',
+        {{p.room.pk|default:'\'X\''}},
+        {{p.pk}},
+        {{p.length}},
+        '<b>{{p.main_prelector.full_name}}</b> {{ p.title }} <br /> &#8987; {{ p.length }} min');
+    {% endfor %}
+  });
+</script>
+{% endblock %}

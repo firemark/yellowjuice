@@ -1,0 +1,11 @@
+{% extends 'panel/base.html' %}
+{% load form_render %}
+{% load i18n %}
+
+{% block content %}
+    <form action="." method="POST">
+        {% csrf_token %}
+        {{ form|form_render }}
+        <button type="submit">{% trans "Save" %}</button>
+    </form>
+{% endblock %}

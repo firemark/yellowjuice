@@ -1,0 +1,15 @@
+{% extends 'panel/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<ul>
+    {% for prelection in prelections_list %}
+    <li><a href="{% url 'panel/prelection-update' pk=prelection.pk %}">{{ prelection.description|truncatewords:10 }}</a></li>
+    {% empty %}
+    <p>{% blocktrans %}You haven't proposed any prelections so far.
+    If you, or one of participants you represent, wants to speak at the conference,
+    please propose a prelection by clicking the button below.{% endblocktrans %}</p>
+    {% endfor %}
+</ul>
+<a href="{% url 'panel/prelection-create' %}" class="btn btn-primary">{% trans "Propose a new prelection" %}</a>
+{% endblock %}

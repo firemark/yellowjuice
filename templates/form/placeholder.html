@@ -1,0 +1,13 @@
+{% extends 'form/default.html' %}
+{% load form_render %}
+
+{% block label %}
+    {% if field.field.required %}
+    <label class="control-label pull-left" for="{{ field.name }}">
+        <b>*&nbsp;</b>
+    </label>
+    {% endif %}
+{% endblock %}
+{% block field %}
+    {{ field|set_placeholder:field.label }}
+{% endblock %}
