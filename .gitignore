@@ -1,3 +1,12 @@
+# default sqlite DB
+/yellowjuice.db
+# collected static files for production
+/collected_static/
+# sphinx build directory
+/doc/_build/
+
+# py.test
+/.cache/
 *.py[cod]
 
 # C extensions
